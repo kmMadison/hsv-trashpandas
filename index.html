@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div id="app">
+        	<div id="gtco-header" class="gtco-cover" role="banner" style="background-image:url(../static/img/data_splash.jpg);">
+                <div class="overlay"></div>
+                <div class="gtco-container">
+                    <div class="row">
+                        <div class="col-md-12 col-md-offset-0 text-center">
+                            <div class="display-t">
+                                <div class="display-tc animate-box" data-animate-effect="fadeIn">
+                                    <h1>Chasers of the Lost Data</h1>
+                                    <p>
+                                        <a href="/before" class="btn btn-primary btn-lg">Before data set</a> 
+                                        <a href="/after" class="btn btn-white btn-outline btn-lg">After data set</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    let app = new Vue({
+        el: '#app',
+        delimiters: [ '[[', ']]'],
+        data: {
+            title: 'hello world!',
+            band: {},
+            message: 'You loaded this page on ' + new Date().toLocaleTimeString,
+            todos: [
+                { text: 'Learn JavaScript' },
+                { text: 'Learn Vue' },
+                { text: 'Build something awesome' }
+            ],
+            anInput: 'Colorful',
+            selectedTime: 0,
+            timeLeft: '00:00',
+            endTime: '10/18/2019',
+            countDown : 103197,
+            headersFireball: ["item0","item1","item2","item3","item4","item5","item6","Date/Time - Peak Brightness (UT)","Latitude (Deg)","Longitude (Deg)","Altitude (km)","Velocity (km/s)","Velocity Components (km/s): vx","Velocity Components (km/s): vy","Velocity Components (km/s): vz","Total Radiated Energy (J)","Calculated Total Impact Energy (kt)"]
+        },
+        methods: {
+            countDownTimer() {
+                if(this.countDown > 0) {
+                    setTimeout(() => {
+                        this.countDown -= 1;
+                        this.countDownTimer()
+                    }, 1000)
+                }
+            }
+        },
+        mounted () {
+            axios
+            .get('https://data.nasa.gov/api/views/mc52-syum/rows.json')
+            .then(response => {
+                this.info = response; 
+                console.log('fetched data');
+                console.log(response.data);
+            })
+        },
+        created: function () {
+           this.countDownTimer()
+        }
+    })
+
+
+</script>
+{% endblock %}

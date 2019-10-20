@@ -1,0 +1,66 @@
+* {
+    box-sizing: border-box;
+}
+
+#app {
+    /*margin-left: 32px;
+    margin-right: 32px;*/
+}
+
+.pagePadding {
+    height: 50px;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    background-color: DodgerBlue;
+    justify-content: center;
+}
+
+.flex-container > div {
+    /*background-color: #f1f1f1;
+    max-width: 150px;*/
+    margin: 10px;
+    padding: 2px;
+    text-align: center;
+    line-height: 35px;
+    font-size: 20px;
+    word-wrap:break-word;
+  }
+
+.flex-item {
+    align-items: center;
+}
+
+.message {
+    padding: 10px;
+}
+
+@import url(https://fonts.googleapis.com/css?family=Roboto+Condensed:400|Roboto:100);
+
+.block {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+.text {
+    color: #1abc9c;
+    font-size: 40px;
+    font-family: 'Roboto Condensed', serif;
+    font-weight: 40;
+    margin-top:10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.digit {
+    color: #ecf0f1;
+    font-size: 150px;
+    font-weight: 100;
+    font-family: 'Roboto', serif;
+    margin: 10px;
+    text-align: center;
+}
+  

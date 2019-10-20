@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div id="bucket" style="margin-top: 135px;">
+        <h2></h2>
+    </div>
+
+    <div class="container" style="margin-left: 40px;">
+    <canvas id="canvasOne" width="1024" height="768" style="margin-left: 40px; border: 1px solid grey;">
+            Your browser does not support HTML5 Canvas.
+    </canvas>
+    </div>
+
+{% block scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "../static/data/dataBefore.csv",
+        dataType: "text",
+        success: function(data) {processData(data);},
+        error: function (request, status, error) {
+            console.log("error occurred");
+        }
+     });
+});
+
+function processData(allText) {
+    console.log("reading the csv");
+    var record_num = 10;  // or however many elements there are in each row
+
+    var allTextLines = allText.split(/\r\n|\n/);
+    var lenCsv = allTextLines.length;
+    var entries = allTextLines[0].split(',');
+    console.log("entries " + entries[3]);
+    var lines = [];
+
+    var headings = entries.splice(0,record_num);
+    console.log("Heading" + headings);
+    //while (entries.length > 0) {
+    var tarr = [];
+        for (var i=1; i < lenCsv-1; i++) {
+            data = allTextLines[i].split(',');
+            myObj = {
+                bright: data[0],
+                alt: parseFloat(data[1]),
+                lat: data[2],
+                lon: data[3],
+                vel: data[4],
+                vx:parseFloat(data[5]),
+                vy:parseFloat(data[6]),
+                vz:parseFloat(data[7]),
+                ener:parseFloat(data[8]),
+                impact:data[9]
+            }
+            tarr.push(myObj);
+    }
+    /*for (var i=1; i < lenCsv; i++) {
+        var tarr = [];
+        for (var j=0; j< record_num; j++) {
+            tarr.push(headings[j] + ":"+ allTextLines[i]);
+        }
+        lines.push(tarr);
+    }
+
+            for (var i=1; i < lenCsv; i++) {
+            
+            tarr.push(headings[j] + ":"+ allTextLines[i]);
+            console.log(headings[j] + ":"+ allTextLines[i]);
+        } */
+    //alert(lines);
+    console.log(tarr[1]);
+    console.log("tarr length is " + tarr.length);
+
+    createWorldWind(tarr);
+}
+    
+        //https://data.nasa.gov/api/views/mc52-syum/rows.json
+
+        function createWorldWind(dataObject) {
+            //console.log("Inside the createworldwind function " + JSON.stringify(dataObject));
+        // Create a WorldWindow for the canvas.
+        var wwd = new WorldWind.WorldWindow("canvasOne");
+
+        wwd.addLayer(new WorldWind.BMNGOneImageLayer());
+        wwd.addLayer(new WorldWind.BMNGLandsatLayer());
+
+        wwd.addLayer(new WorldWind.CompassLayer());
+        wwd.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
+        wwd.addLayer(new WorldWind.ViewControlsLayer(wwd));
+
+        // Add a polygon
+        var polygonLayer = new WorldWind.RenderableLayer();
+        
+
+        //Position computePositionFromPoint
+        var elevMod = new WorldWind.EarthElevationModel();
+        var globe = new WorldWind.Globe(elevMod, null);
+        //var geo_p   = new WorldWind.GeographicProjection("name", true, null);
+        //var wgs84 = new WorldWind.ProjectionUPS("North");
+
+        
+    
+        for (var i=0; i < dataObject.length; i ++) {
+            var avx = dataObject[i].vx;
+            var avy = dataObject[i].vy;
+            var avz = dataObject[i].vz;
+            var alat = dataObject[i].lat;
+            var alon = dataObject[i].lon;
+            var aalt = dataObject[i].alt;
+            var aener = dataObject[i].ener;
+
+            console.log(dataObject[i]);
+            plotFi(polygonLayer, dataObject[i].vx, dataObject[i].vy, dataObject[i].vz, dataObject[i].lat, dataObject[i].lon, dataObject[i].alt, dataObject[i].ener, globe);
+        }
+ 
+        
+        wwd.addLayer(polygonLayer);
+
+        
+
+        var logError = function (jqXhr, text, exception) {
+            console.log("There was a failure retrieving the capabilities document: " +
+                text +
+            " exception: " + exception);
+        };
+
+        //end of the function for world wind
+        }
+
+        ///console.log('reading csv');
+        //csvJSON("data.csv");
+
+
+        //var csv is the CSV file with headers
+        function plotFi(polLay, vx, vy, vz, lat, lon, alt, ener, globe){
+            
+            if (lat.slice(-1) == "N"){
+                lat = parseFloat(lat.substring(0,lat.length-1));
+            } else {
+                lat = -1*parseFloat(lat.substring(0,lat.length-1));
+            }
+            if (lon.slice(-1) == "E"){
+                lon = parseFloat(lon.substring(0,lon.length-1));
+            } else {
+                lon = -1*parseFloat(lon.substring(0,lon.length-1));
+            }
+
+            var llh = new WorldWind.Vec3(0,0,0);
+            llh = globe.computePointFromPosition(lat,lon,alt,llh);
+            var scale = 3000;
+            var x = vx;
+            var y = vy;
+            var z = vz;
+
+
+
+            var llh2 = new WorldWind.Vec3(0,0,0);
+
+            llh2[0] = llh[0]+ scale*y;
+            llh2[1] = llh[1]+ scale*z;
+            llh2[2] = llh[2] + scale*x;
+
+            var llh3 = new WorldWind.Vec3(0,0,0);
+
+            llh3[0] = llh[0]- 4*scale*y;
+            llh3[1] = llh[1]- 4*scale*z;
+            llh3[2] = llh[2]- 4*scale*x;
+
+            llh = globe.computePositionFromPoint(llh[0],llh[1], llh[2],llh);
+            llh2 = globe.computePositionFromPoint(llh2[0],llh2[1], llh2[2],llh2);
+            llh3 = globe.computePositionFromPoint(llh3[0],llh3[1], llh3[2],llh3); 
+
+            var polygonAttributes = new WorldWind.ShapeAttributes(null);
+            polygonAttributes.interiorColor = new WorldWind.Color(0, 1, 1, 0.75);
+            polygonAttributes.outlineColor = WorldWind.Color.RED;
+            polygonAttributes.drawOutline = true;
+            polygonAttributes.applyLighting = true;
+
+            var boundaries = [];
+            boundaries.push(new WorldWind.Position(llh.latitude, llh.longitude, llh.altitude));
+            boundaries.push(new WorldWind.Position(llh3.latitude, llh3.longitude, llh3.altitude));
+            boundaries.push(new WorldWind.Position(llh2.latitude, llh2.longitude, llh2.altitude));
+            //boundaries.push(new WorldWind.Position(20.0, -95.0, 700000.0));
+
+            var polygon = new WorldWind.Polygon(boundaries, polygonAttributes);
+            polygon.extrude = false;
+            polLay.addRenderable(polygon);
+
+
+
+            var bound2 = [];
+
+            var cvscale = Math.log(ener)-(Math.log(1E+5));
+            var csc = 8000;
+
+            var i;
+            var imax = 10;
+            for (i = 0; i<imax; i++){
+                    var a = Math.sin(i*Math.PI/(imax/2));
+                    var b = Math.cos(i*Math.PI/(imax/2));
+                    var c = -(1/z)*(x*a+y*b);
+
+                    var g = Math.sqrt(a*a+b*b+c*c);
+
+                    var d = a/Math.abs(g);
+                    var e = b/Math.abs(g);
+                    var f = c/Math.abs(g);
+
+                    var llhc = new WorldWind.Vec3(0,0,0);
+                    llhc[0] = llh[0] + csc*cvscale*e;
+                    llhc[1] = llh[1] + csc*cvscale*f;
+                    llhc[2] = llh[2] + csc*cvscale*d;
+
+                    llhc = globe.computePositionFromPoint(llhc[0],llhc[1], llhc[2],llhc); 
+
+                    bound2.push(new WorldWind.Position(llhc.latitude, llhc.longitude, llhc.altitude));
+            }
+
+            var metpoly = new WorldWind.Polygon(bound2, polygonAttributes);
+            polLay.addRenderable(metpoly);
+        }
+
+            function csvJSON(csv){
+            var lines=csv.split("\n");
+
+            var result = [];
+
+            var headers=lines[0].split(",");
+
+            for(var i=1;i<lines.length;i++){
+
+                var obj = {};
+                var currentline=lines[i].split(",");
+
+                for(var j=0;j<headers.length;j++){
+                    obj[headers[j]] = currentline[j];
+                }
+
+                result.push(obj);
+
+            }
+
+            //return result; //JavaScript object
+            return JSON.stringify(result); //JSON
+            }
+        </script>
+
+    {% endblock %}
+{% endblock %}
