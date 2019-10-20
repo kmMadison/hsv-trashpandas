@@ -1,0 +1,25 @@
+Steps to Set Up Python/Flask
+
+1) Ensure you have the latest version of Python installed
+
+2) Make a new folder - i.e. space_hsv
+
+3) Open Visual Code (Not Studio) and open the folder space_hsv
+
+4) Install the python virtual machine with the command: 
+	- pip3 install pipenv (This is the windows command.)
+
+5) Enter the command: 
+	- pipenv shell
+	- This will create a pip file that will keep track of all the packages once installs
+
+6) Once you launch the virtual environment, you need to install some dependencies as follows in the command line:
+	- pipenv install -U Flask-SQLAlchemy
+	- pipenv install psycopg2
+	- pipenv install psycopg2-binary (might not be needed. run without first. only download if necessary)
+	- pipenv install flask flask-sqlalchemy flask-marshmallow marshmallow-sqlalchemy
+		- https://flask-marshmallow.readthedocs.io/en/latest/
+	- pipenv install gunicorn (for deployment to heroku)
+	
+7) To Launch localhost - cd into the folder flaskr and run the command:
+	- python __init__.py
